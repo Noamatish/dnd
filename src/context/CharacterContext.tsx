@@ -15,7 +15,7 @@ export const initialAttributes: Attribute[] = [
 export const races: Race[] = ["Human", "Elf", "Dwarf"];
 
 // Define initial state
-const initialState = {
+export const initialState = {
   playerName: "",
   characterName: "",
   race: "Human" as Race,
@@ -26,7 +26,7 @@ const initialState = {
 };
 
 // Define actions
-type Action =
+export type Action =
   | { type: "SET_PLAYER_NAME"; payload: string }
   | { type: "SET_CHARACTER_NAME"; payload: string }
   | { type: "SET_RACE"; payload: Race }
@@ -36,7 +36,7 @@ type Action =
   | { type: "SET_ATTRIBUTE_ERRORS"; payload: string[] };
 
 // Define reducer
-const reducer = (state: typeof initialState, action: Action) => {
+export const reducer = (state: typeof initialState, action: Action) => {
   switch (action.type) {
     case "SET_PLAYER_NAME":
       return { ...state, playerName: action.payload };

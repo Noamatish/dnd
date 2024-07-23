@@ -29,13 +29,14 @@ const AttributeRow: React.FC<AttributeRowProps> = ({
           variant="outlined"
           onClick={() => handleChange(index, -1)}
           fullWidth
+          data-testid="decrease"
         >
           -
         </Button>
       </Tooltip>
     </Grid>
     <Grid item xs={3}>
-      <Tooltip title={error} arrow placement="top">
+      <Tooltip data-testid="error" title={error} arrow placement="top">
         <TextField
           className={`attribute-value ${error ? "error" : ""}`}
           type="number"
@@ -53,6 +54,7 @@ const AttributeRow: React.FC<AttributeRowProps> = ({
           variant="outlined"
           onClick={() => handleChange(index, 1)}
           fullWidth
+          data-testid="increase"
         >
           +
         </Button>

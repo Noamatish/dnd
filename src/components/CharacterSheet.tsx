@@ -205,9 +205,10 @@ const CharacterSheet: React.FC = () => {
             value={state.race}
             onChange={(e) => handleRaceChange(e.target.value as Race)}
             fullWidth
+            data-testid="race-select"
           >
             {races.map((race) => (
-              <MenuItem key={race} value={race}>
+              <MenuItem data-testid={race} key={race} value={race}>
                 {race}
               </MenuItem>
             ))}
