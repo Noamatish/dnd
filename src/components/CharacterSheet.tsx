@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   TextField,
   Select,
@@ -9,6 +9,7 @@ import {
   InputAdornment,
   IconButton,
   LinearProgress,
+  Button,
 } from "@mui/material";
 import "../styles/index.css";
 
@@ -34,11 +35,20 @@ import {
   raceAttributeRanges,
 } from "../constants/constants";
 import AttributeRow from "../components/AttributeRow";
-import { Race } from "../interfaces/Character";
+import { Attribute, Race } from "../interfaces/Character";
+import GeneratedCharacter from "../components/GeneratedCharacter";
 
 const CharacterSheet: React.FC = () => {
   const state = useCharacterState();
   const dispatch = useCharacterDispatch();
+  const [showGenerated, setShowGenerated] = useState(false);
+  const [generatedCharacter, setGeneratedCharacter] = useState<{
+    characterName: string;
+    playerName: string;
+    race: Race;
+    attributes: Attribute[];
+  } | null>(null);
+  const generatedCharacterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const total = calculateTotalPoints(state.attributes);
@@ -162,14 +172,57 @@ const CharacterSheet: React.FC = () => {
     }
   };
 
+  const resetState = () => {
+    setPlayerName(dispatch, "");
+    setCharacterName(dispatch, "");
+    setRace(dispatch, "Human");
+    setAttributes(dispatch, initialAttributes);
+    setTotalPoints(dispatch, 60);
+    setAttributeErrors(
+      dispatch,
+      initialAttributes.map(() => "")
+    );
+  };
+
+  const generateCharacter = () => {
+    setGeneratedCharacter({
+      characterName: state.characterName,
+      playerName: state.playerName,
+      race: state.race,
+      attributes: state.attributes,
+    });
+
+    resetState();
+    setShowGenerated(true);
+  };
+
+  useEffect(() => {
+    if (showGenerated && generatedCharacterRef.current) {
+      setTimeout(() => {
+        if (generatedCharacterRef.current) {
+          generatedCharacterRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+          });
+        }
+      }, 100); // delay to ensure DOM update
+    }
+  }, [showGenerated]);
+
+  const isGenerateDisabled =
+    !state.playerName ||
+    !state.characterName ||
+    !state.race ||
+    state.totalPoints < 83;
+
   const pointsLeft = 83 - state.totalPoints;
 
   return (
-    <Box p={3} className="character-sheet" maxWidth={600} mx="auto">
+    <Box p={3} className="character-sheet" maxWidth={700} mx="auto">
       <Typography variant="h4" gutterBottom>
         D&D Character Sheet
       </Typography>
-      <Grid container spacing={2.5}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
             label="Player Name"
@@ -205,10 +258,13 @@ const CharacterSheet: React.FC = () => {
             value={state.race}
             onChange={(e) => handleRaceChange(e.target.value as Race)}
             fullWidth
-            data-testid="race-select"
+            displayEmpty
           >
+            <MenuItem value="" disabled>
+              <em>Select a Race</em>
+            </MenuItem>
             {races.map((race) => (
-              <MenuItem data-testid={race} key={race} value={race}>
+              <MenuItem key={race} value={race}>
                 {race}
               </MenuItem>
             ))}
@@ -234,11 +290,32 @@ const CharacterSheet: React.FC = () => {
             error={state.attributeErrors[index]}
           />
         ))}
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={generateCharacter}
+            fullWidth
+            disabled={isGenerateDisabled}
+          >
+            Generate Character
+          </Button>
+        </Grid>
       </Grid>
       {state.errorMessage && (
         <Typography color="error" variant="body1" align="center" mt={2}>
           {state.errorMessage}
         </Typography>
+      )}
+      {showGenerated && generatedCharacter && (
+        <div ref={generatedCharacterRef}>
+          <GeneratedCharacter
+            characterName={generatedCharacter.characterName}
+            playerName={generatedCharacter.playerName}
+            race={generatedCharacter.race}
+            attributes={generatedCharacter.attributes}
+          />
+        </div>
       )}
     </Box>
   );
