@@ -3,44 +3,60 @@ import {
   TextField,
   Select,
   MenuItem,
-  Button,
   Grid,
   Typography,
   Box,
   InputAdornment,
   IconButton,
   LinearProgress,
-  Tooltip,
 } from "@mui/material";
 import "../styles/index.css";
 
-import { useCharacter } from "../context/CharacterContext";
-import { Race, raceAttributeRanges, Attribute } from "../interfaces/Character";
-import { initialAttributes, races } from "../context/CharacterContext"; //
-import { fallbackNames } from "../constants/constants";
+import { useCharacterState, useCharacterDispatch } from "../hooks/hooks";
+import {
+  setPlayerName,
+  setCharacterName,
+  setRace,
+  setAttributes,
+  setTotalPoints,
+  setErrorMessage,
+  setAttributeErrors,
+} from "../context/actions";
+import {
+  validateAttributes,
+  calculateTotalPoints,
+  handleAttributeChange,
+} from "../utils/attributeUtils";
+import {
+  initialAttributes,
+  races,
+  fallbackNames,
+  raceAttributeRanges,
+} from "../constants/constants";
+import AttributeRow from "../components/AttributeRow";
+import { Race } from "../interfaces/Character";
 
 const CharacterSheet: React.FC = () => {
-  const { state, dispatch } = useCharacter();
+  const state = useCharacterState();
+  const dispatch = useCharacterDispatch();
 
   useEffect(() => {
-    const total = state.attributes.reduce((sum, attr) => sum + attr.value, 0);
-    dispatch({ type: "SET_TOTAL_POINTS", payload: total });
+    const total = calculateTotalPoints(state.attributes);
+    setTotalPoints(dispatch, total);
   }, [state.attributes, dispatch]);
 
   useEffect(() => {
     const timeoutIds = state.attributeErrors.map((error, index) => {
       if (error !== "") {
-        // Clear error message after 5 seconds
         return setTimeout(() => {
           const newErrors = [...state.attributeErrors];
           newErrors[index] = "";
-          dispatch({ type: "SET_ATTRIBUTE_ERRORS", payload: newErrors });
+          setAttributeErrors(dispatch, newErrors);
         }, 5000);
       }
       return null;
     });
     return () => {
-      // Clear all timeouts when component unmounts
       timeoutIds.forEach((id) => {
         if (id !== null) {
           clearTimeout(id);
@@ -49,71 +65,45 @@ const CharacterSheet: React.FC = () => {
     };
   }, [state.attributeErrors, dispatch]);
 
-  const validateAttributes = (): boolean => {
-    // Check if any attribute is out of range
-    const errors = state.attributes.map((attr) => {
-      const [min, max] = raceAttributeRanges[state.race][attr.abbreviation];
-      if (attr.value < min || attr.value > max) {
-        return `${attr.name} must be between ${min} and ${max}.`;
-      }
-      return "";
-    });
-
-    dispatch({ type: "SET_ATTRIBUTE_ERRORS", payload: errors });
+  const validate = (): boolean => {
+    const errors = validateAttributes(state.attributes, state.race);
+    setAttributeErrors(dispatch, errors);
 
     if (errors.some((error) => error !== "")) {
-      dispatch({
-        type: "SET_ERROR_MESSAGE",
-        payload: "One or more attributes are out of the valid range.",
-      });
+      setErrorMessage(
+        dispatch,
+        "One or more attributes are out of the valid range."
+      );
       return false;
     }
 
     if (state.totalPoints > 83) {
-      dispatch({
-        type: "SET_ERROR_MESSAGE",
-        payload: "Total points must not exceed 83.",
-      });
+      setErrorMessage(dispatch, "Total points must not exceed 83.");
       return false;
     }
 
-    dispatch({ type: "SET_ERROR_MESSAGE", payload: null });
+    setErrorMessage(dispatch, null);
     return true;
   };
 
-  const handleAttributeChange = (index: number, delta: number) => {
-    // Update attribute value and modifier
-    const newAttributes = [...state.attributes];
-    const [min, max] =
-      raceAttributeRanges[state.race][newAttributes[index].abbreviation];
-    const newValue = newAttributes[index].value + delta;
-    if (newValue < min || newValue > max) {
-      const newErrors = [...state.attributeErrors];
-      newErrors[index] = `Value must be between ${min} and ${max}.`;
-      dispatch({ type: "SET_ATTRIBUTE_ERRORS", payload: newErrors });
-      return;
-    }
+  const handleAttributeChangeWrapper = (index: number, delta: number) => {
+    const newAttributes = handleAttributeChange(
+      state.attributes,
+      index,
+      delta,
+      state.race,
+      state.attributeErrors,
+      (errors) => setAttributeErrors(dispatch, errors),
+      state.totalPoints
+    );
 
-    const total = newAttributes.reduce((sum, attr) => sum + attr.value, 0);
-    if (total + delta > 83) {
-      dispatch({
-        type: "SET_ERROR_MESSAGE",
-        payload: "Total points must not exceed 83.",
-      });
-      return;
-    }
+    if (!newAttributes) return;
 
-    newAttributes[index].value = newValue;
-    newAttributes[index].modifier = Math.floor((newValue - 10) / 2);
-    dispatch({ type: "SET_ATTRIBUTES", payload: newAttributes });
-    dispatch({
-      type: "SET_ATTRIBUTE_ERRORS",
-      payload: newAttributes.map(() => ""),
-    });
-    validateAttributes();
+    setAttributes(dispatch, newAttributes);
+    validate();
   };
 
-  const handleAttributeInputChange = (index: number, value: string) => {
+  const handleInputChangeWrapper = (index: number, value: string) => {
     const newValue = parseInt(value, 10);
     const newAttributes = [...state.attributes];
     const [min, max] =
@@ -121,53 +111,41 @@ const CharacterSheet: React.FC = () => {
     if (isNaN(newValue) || newValue < min || newValue > max) {
       const newErrors = [...state.attributeErrors];
       newErrors[index] = `Value must be between ${min} and ${max}.`;
-      dispatch({ type: "SET_ATTRIBUTE_ERRORS", payload: newErrors });
+      setAttributeErrors(dispatch, newErrors);
       newAttributes[index].value = newValue;
-      dispatch({ type: "SET_ATTRIBUTES", payload: newAttributes });
+      setAttributes(dispatch, newAttributes);
       return;
     }
 
     newAttributes[index].value = newValue;
     newAttributes[index].modifier = Math.floor((newValue - 10) / 2);
 
-    const total = newAttributes.reduce((sum, attr) => sum + attr.value, 0);
+    const total = calculateTotalPoints(newAttributes);
     if (total > 83) {
-      dispatch({
-        type: "SET_ERROR_MESSAGE",
-        payload: "Total points must not exceed 83.",
-      });
+      setErrorMessage(dispatch, "Total points must not exceed 83.");
       return;
     }
 
-    dispatch({ type: "SET_ATTRIBUTES", payload: newAttributes });
-    dispatch({
-      type: "SET_ATTRIBUTE_ERRORS",
-      payload: newAttributes.map(() => ""),
-    });
-    validateAttributes();
+    setAttributes(dispatch, newAttributes);
+    validate();
   };
 
   const handleRaceChange = (newRace: Race) => {
-    dispatch({ type: "SET_RACE", payload: newRace });
+    setRace(dispatch, newRace);
 
-    // Reset attribute values based on initial values and new race limits
-    const newAttributes = initialAttributes.map((attr: Attribute) => {
-      const newValue = 10; // Reset to initial value
+    const newAttributes = initialAttributes.map((attr) => ({
+      ...attr,
+      value: 10,
+      modifier: Math.floor((10 - 10) / 2),
+    }));
 
-      return {
-        ...attr,
-        value: newValue,
-        modifier: Math.floor((newValue - 10) / 2),
-      };
-    });
-
-    dispatch({ type: "SET_ATTRIBUTES", payload: newAttributes });
-    dispatch({
-      type: "SET_ATTRIBUTE_ERRORS",
-      payload: newAttributes.map(() => ""),
-    });
-    dispatch({ type: "SET_TOTAL_POINTS", payload: 60 }); // Reset total points
-    validateAttributes();
+    setAttributes(dispatch, newAttributes);
+    setTotalPoints(dispatch, 60);
+    setAttributeErrors(
+      dispatch,
+      newAttributes.map(() => "")
+    );
+    validate();
   };
 
   const fetchRandomName = async () => {
@@ -175,13 +153,12 @@ const CharacterSheet: React.FC = () => {
       const response = await fetch("https://randomuser.me/api/");
       const data = await response.json();
       const name = `${data.results[0].name.first} ${data.results[0].name.last}`;
-      dispatch({ type: "SET_CHARACTER_NAME", payload: name });
+      setCharacterName(dispatch, name);
     } catch (error) {
       console.error("Error fetching random name:", error);
-      // Fallback to a random name from the list
       const fallbackName =
         fallbackNames[Math.floor(Math.random() * fallbackNames.length)];
-      dispatch({ type: "SET_CHARACTER_NAME", payload: fallbackName });
+      setCharacterName(dispatch, fallbackName);
     }
   };
 
@@ -197,9 +174,7 @@ const CharacterSheet: React.FC = () => {
           <TextField
             label="Player Name"
             value={state.playerName}
-            onChange={(e) =>
-              dispatch({ type: "SET_PLAYER_NAME", payload: e.target.value })
-            }
+            onChange={(e) => setPlayerName(dispatch, e.target.value)}
             fullWidth
           />
         </Grid>
@@ -207,9 +182,7 @@ const CharacterSheet: React.FC = () => {
           <TextField
             label="Character Name"
             value={state.characterName}
-            onChange={(e) =>
-              dispatch({ type: "SET_CHARACTER_NAME", payload: e.target.value })
-            }
+            onChange={(e) => setCharacterName(dispatch, e.target.value)}
             fullWidth
             InputProps={{
               endAdornment: (
@@ -233,7 +206,7 @@ const CharacterSheet: React.FC = () => {
             onChange={(e) => handleRaceChange(e.target.value as Race)}
             fullWidth
           >
-            {races.map((race: Race) => (
+            {races.map((race) => (
               <MenuItem key={race} value={race}>
                 {race}
               </MenuItem>
@@ -251,68 +224,14 @@ const CharacterSheet: React.FC = () => {
           </Typography>
         </Grid>
         {state.attributes.map((attr, index) => (
-          <Grid
-            item
-            xs={12}
+          <AttributeRow
             key={attr.abbreviation}
-            container
-            alignItems="center"
-            spacing={1}
-          >
-            <Grid item xs={3}>
-              <Typography>
-                {attr.name} ({attr.abbreviation})
-              </Typography>
-            </Grid>
-            <Grid item xs={2}>
-              <Tooltip title="Decrease">
-                <Button
-                  variant="outlined"
-                  onClick={() => handleAttributeChange(index, -1)}
-                  fullWidth
-                >
-                  -
-                </Button>
-              </Tooltip>
-            </Grid>
-            <Grid item xs={3}>
-              <Tooltip
-                title={state.attributeErrors[index]}
-                arrow
-                placement="top"
-              >
-                <TextField
-                  className={`attribute-value ${
-                    state.attributeErrors[index] ? "error" : ""
-                  }`}
-                  type="number"
-                  value={attr.value}
-                  onChange={(e) =>
-                    handleAttributeInputChange(index, e.target.value)
-                  }
-                  error={!!state.attributeErrors[index]}
-                  fullWidth
-                  inputProps={{ style: { textAlign: "center" } }}
-                />
-              </Tooltip>
-            </Grid>
-            <Grid item xs={2}>
-              <Tooltip title="Increase">
-                <Button
-                  variant="outlined"
-                  onClick={() => handleAttributeChange(index, 1)}
-                  fullWidth
-                >
-                  +
-                </Button>
-              </Tooltip>
-            </Grid>
-            <Grid item xs={2}>
-              <Typography align="center">
-                {attr.modifier > 0 ? `+${attr.modifier}` : `${attr.modifier}`}
-              </Typography>
-            </Grid>
-          </Grid>
+            attr={attr}
+            index={index}
+            handleChange={handleAttributeChangeWrapper}
+            handleInputChange={handleInputChangeWrapper}
+            error={state.attributeErrors[index]}
+          />
         ))}
       </Grid>
       {state.errorMessage && (

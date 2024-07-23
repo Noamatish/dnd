@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useContext, ReactNode } from "react";
-import { Attribute, Race, AttributeRanges } from "../interfaces/Character";
+import { Attribute, Race } from "../interfaces/Character";
 
 // Define initial attributes
 export const initialAttributes: Attribute[] = [
@@ -58,7 +58,7 @@ const reducer = (state: typeof initialState, action: Action) => {
 };
 
 // Create context
-const CharacterContext = createContext<{
+export const CharacterContext = createContext<{
   state: typeof initialState;
   dispatch: React.Dispatch<Action>;
 }>({
