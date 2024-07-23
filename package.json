@@ -17,8 +17,7 @@
     "react-scripts": "5.0.1",
     "shadcn": "^1.0.0",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4",
-    "homepage": "https://noamatish.github.io/dnd"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
