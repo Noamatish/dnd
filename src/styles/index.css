@@ -191,3 +191,106 @@ input::placeholder {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
+
+/* Small Mobile Phones */
+@media (max-width: 400px) {
+  .character-sheet {
+    padding: 5px;
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+  .MuiTypography-h4 {
+    font-size: 0.75rem !important;
+  }
+
+  .MuiTextField-root,
+  .MuiSelect-root,
+  .MuiButton-root {
+    font-size: 0.5rem !important;
+  }
+
+  .MuiButton-root {
+    padding: 4px 8px;
+  }
+
+  h1, h2, h3, h4, h5, h6, p,
+  button, input, select, div, span, fieldset, label,
+  input::placeholder {
+    font-size: 0.5rem !important;
+  }
+
+  .MuiLinearProgress-root {
+    height: 3px;
+  }
+}
+
+/* Mobile (Portrait) */
+@media (min-width: 401px) and (max-width: 600px) {
+  .character-sheet {
+    padding: 10px;
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+  .MuiTypography-h4 {
+    font-size: 1rem !important;
+  }
+
+  .MuiTextField-root,
+  .MuiSelect-root,
+  .MuiButton-root {
+    font-size: 0.75rem !important;
+  }
+
+  .MuiButton-root {
+    padding: 6px 12px;
+  }
+
+  h1, h2, h3, h4, h5, h6, p,
+  button, input, select, div, span, fieldset, label,
+  input::placeholder {
+    font-size: 0.75rem !important;
+  }
+
+  .MuiLinearProgress-root {
+    height: 4px;
+  }
+}
+
+/* Tablet (Portrait) */
+@media (min-width: 601px) and (max-width: 900px) {
+  .character-sheet {
+    padding: 15px;
+    max-width: 90%;
+  }
+
+  .MuiTypography-h4 {
+    font-size: 1.25rem !important;
+  }
+
+  .MuiTextField-root,
+  .MuiSelect-root,
+  .MuiButton-root {
+    font-size: 0.875rem !important;
+  }
+
+  .MuiButton-root {
+    padding: 8px 16px;
+  }
+
+  h1, h2, h3, h4, h5, h6, p,
+  button, input, select, div, span, fieldset, label,
+  input::placeholder {
+    font-size: 0.875rem !important;
+  }
+
+  .MuiLinearProgress-root {
+    height: 5px;
+  }
+}
+
+
+
+

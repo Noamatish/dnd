@@ -218,7 +218,15 @@ const CharacterSheet: React.FC = () => {
   const pointsLeft = 83 - state.totalPoints;
 
   return (
-    <Box p={3} className="character-sheet" maxWidth={700} mx="auto">
+    <Box
+      p={3}
+      className="character-sheet"
+      sx={{
+        maxWidth: { xs: "100%", sm: 400, md: 700 },
+        mx: "auto",
+        p: { xs: 1, sm: 2, md: 3 },
+      }}
+    >
       <Typography variant="h4" gutterBottom>
         D&D Character Sheet
       </Typography>
