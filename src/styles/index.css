@@ -1,0 +1,178 @@
+:root {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --navbar-background-color: #1976d2;
+  --navbar-text-color: #ffffff;
+  --input-background-color: #ffffff;
+  --input-text-color: #000000;
+  --input-border-color: #cccccc;
+  --button-background-color: #1976d2;
+  --button-text-color: #ffffff;
+  --tooltip-background-color: #555555;
+  --tooltip-text-color: #ffffff;
+}
+
+.dark-theme {
+  --background-color: #1e1e1e;
+  --text-color: #ffffff;
+  --navbar-background-color: #1e1e1e;
+  --navbar-text-color: #ffffff;
+  --input-background-color: #4b4b4b;
+  --input-text-color: #ffffff;
+  --input-border-color: #777777;
+  --button-background-color: #555555;
+  --button-text-color: #ffffff;
+  --tooltip-background-color: #777777;
+  --tooltip-text-color: #ffffff;
+}
+
+html,
+body {
+  font-family: "Roboto", sans-serif;
+  font-family: "Rajdhani", sans-serif !important;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-family: "Orbitron", sans-serif !important;
+}
+
+button,
+input,
+select,
+div,
+span,
+fieldset,
+label,
+input::placeholder {
+  font-family: "Press Start 2P", sans-serif !important;
+}
+
+.navbar {
+  background-color: var(--navbar-background-color);
+  color: var(--navbar-text-color);
+}
+
+.main-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background-color);
+  min-height: calc(100vh - 64px); /* Adjust for navbar height */
+}
+
+.character-sheet {
+  padding: 20px;
+  background-color: var(--input-background-color);
+  color: var(--input-text-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto; /* Center horizontally */
+}
+
+.character-sheet .MuiButton-root {
+  margin-top: 10px;
+}
+
+.attribute-value input {
+  text-align: center;
+  background-color: unset;
+  color: unset;
+  opacity: 1;
+  -webkit-text-fill-color: var(--input-text-color) !important;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.error {
+  border: 1.5px solid red !important;
+  animation: shake 0.2s ease;
+  transition: border 0.1s ease-in-out;
+}
+
+.attribute-value.error {
+  border: 1px solid red;
+}
+
+.MuiTextField-root {
+  background-color: var(--input-background-color);
+  color: var(--input-text-color);
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+}
+
+.MuiButton-root {
+  background-color: var(--button-background-color);
+  color: var(--button-text-color);
+}
+
+.MuiSelect-root {
+  background-color: var(--input-background-color);
+  color: var(--input-text-color);
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+}
+.MuiSelect-nativeInput {
+  color: var(--text-color) !important;
+}
+.MuiFormControl-root {
+  color: var(--text-color) !important;
+}
+.MuiFormLabel-root {
+  color: var(--text-color) !important;
+}
+.MuiInputBase-root {
+  color: var(--text-color) !important;
+}
+.MuiSelect-select {
+  color: var(--text-color) !important;
+}
+.MuiInputBase-input {
+  color: var(--text-color) !important;
+}
+
+.MuiInputBase-input span {
+  color: var(--text-color) !important;
+}
+.MuiOutlinedInput-notchedOutline {
+  color: var(--text-color) !important;
+}
+.MuiTypography-root {
+  color: var(--text-color) !important;
+}
+
+.MuiTooltip-tooltip {
+  background-color: var(--tooltip-background-color) !important;
+  color: var(--tooltip-text-color) !important;
+}
