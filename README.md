@@ -22,7 +22,7 @@ A React application for creating and managing Dungeons & Dragons character sheet
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/dnd.git
+   git clone https://github.com/Noamatish/dnd.git
    cd dnd
    npm i
    npm start
